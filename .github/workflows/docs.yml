@@ -1,0 +1,14 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  docs:
+    uses: TANISHQ1204/autodocs/.github/workflows/autodocs.yml@main
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+      pull-requests: write
