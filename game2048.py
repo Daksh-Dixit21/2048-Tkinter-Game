@@ -5,22 +5,12 @@ import random
 GRID_SIZE = 4
 TILE_SIZE = 100
 PADDING = 10
-FONT_SIZE = 36
 BOARD_SIZE = GRID_SIZE * TILE_SIZE + (GRID_SIZE + 1) * PADDING
 
 COLORS = {
-    0: "#cdc1b4",
-    2: "#eee4da",
-    4: "#ede0c8",
-    8: "#f2b179",
-    16: "#f59563",
-    32: "#f67c5f",
-    64: "#f65e3b",
-    128: "#edcf72",
-    256: "#edcc61",
-    512: "#edc850",
-    1024: "#edc53f",
-    2048: "#edc22e",
+    0: "#cdc1b4", 2: "#eee4da", 4: "#ede0c8", 8: "#f2b179",
+    16: "#f59563", 32: "#f67c5f", 64: "#f65e3b", 128: "#edcf72",
+    256: "#edcc61", 512: "#edc850", 1024: "#edc53f", 2048: "#edc22e",
 }
 
 
@@ -54,11 +44,8 @@ class Board:
         moved = False
         for r in range(GRID_SIZE):
             original = self.grid[r][:]
-            compressed = self.compress(self.grid[r])
-            merged = self.merge(compressed)
-            final = self.compress(merged)
-            self.grid[r] = final
-            if final != original:
+            self.grid[r] = self.compress(self.merge(self.compress(self.grid[r])))
+            if self.grid[r] != original:
                 moved = True
         return moved
 
@@ -69,9 +56,8 @@ class Board:
             reversed_row = self.grid[r][::-1]
             compressed = self.compress(reversed_row)
             merged = self.merge(compressed)
-            final = self.compress(merged)[::-1]
-            self.grid[r] = final
-            if final != original:
+            self.grid[r] = self.compress(merged)[::-1]
+            if self.grid[r] != original:
                 moved = True
         return moved
 
@@ -79,9 +65,8 @@ class Board:
         moved = False
         for c in range(GRID_SIZE):
             original = [self.grid[r][c] for r in range(GRID_SIZE)]
-            column = [self.grid[r][c] for r in range(GRID_SIZE)]
-            compressed = self.compress(column)
-            merged = self.merge(compressed)
+            column = self.compress([self.grid[r][c] for r in range(GRID_SIZE)])
+            merged = self.merge(column)
             final = self.compress(merged)
             for r in range(GRID_SIZE):
                 self.grid[r][c] = final[r]
@@ -93,9 +78,8 @@ class Board:
         moved = False
         for c in range(GRID_SIZE):
             original = [self.grid[r][c] for r in range(GRID_SIZE)]
-            column = [self.grid[r][c] for r in range(GRID_SIZE)][::-1]
-            compressed = self.compress(column)
-            merged = self.merge(compressed)
+            column = self.compress([self.grid[r][c] for r in range(GRID_SIZE)][::-1])
+            merged = self.merge(column)
             final = self.compress(merged)[::-1]
             for r in range(GRID_SIZE):
                 self.grid[r][c] = final[r]
@@ -125,68 +109,68 @@ class Board:
 
 
 class Game2048:
-    def __init__(self, root):
+    def __init__(self, root, back_callback=None):
         self.root = root
+        self.back_callback = back_callback
         self.root.title("2048")
         self.root.resizable(False, False)
 
         self.board = Board()
-        self.canvas = tk.Canvas(root, width=BOARD_SIZE, height=BOARD_SIZE + 60, bg="#faf8ef")
-        self.canvas.pack()
+
+        self.top_frame = tk.Frame(root, bg="#faf8ef")
+        self.top_frame.pack(fill="x")
+        self.score_label = tk.Label(self.top_frame, text=f"Score: {self.board.score}",
+                                    font=("Helvetica", 18, "bold"), bg="#faf8ef", fg="#776e65")
+        self.score_label.pack(side="left", padx=10)
+        tk.Button(self.top_frame, text="Restart", command=self.restart,
+                  font=("Helvetica", 12), bg="#8f7a66", fg="white").pack(side="right", padx=10)
+        tk.Button(self.top_frame, text="Menu", command=self.go_back,
+                  font=("Helvetica", 12), bg="#8f7a66", fg="white").pack(side="right", padx=5)
+
+        self.canvas = tk.Canvas(root, width=BOARD_SIZE, height=BOARD_SIZE, bg="#faf8ef")
+        self.canvas.pack(padx=10, pady=10)
 
         self.draw_board()
-        self.bind_keys()
-
-    def draw_board(self):
-        self.canvas.delete("all")
-        self.canvas.create_text(
-            BOARD_SIZE // 2, 30, text=f"Score: {self.board.score}",
-            font=("Helvetica", 20, "bold"), fill="#776e65"
-        )
-
-        for r in range(GRID_SIZE):
-            for c in range(GRID_SIZE):
-                x = c * (TILE_SIZE + PADDING) + PADDING
-                y = r * (TILE_SIZE + PADDING) + PADDING + 50
-                value = self.board.grid[r][c]
-                color = COLORS.get(value, "#3c3a32")
-                text_color = "#f9f6f2" if value >= 8 else "#776e65"
-
-                self.canvas.create_rectangle(x, y, x + TILE_SIZE, y + TILE_SIZE, fill=color, outline="")
-                if value != 0:
-                    self.canvas.create_text(
-                        x + TILE_SIZE // 2, y + TILE_SIZE // 2,
-                        text=str(value), font=("Helvetica", FONT_SIZE, "bold"), fill=text_color
-                    )
-
-    def bind_keys(self):
         self.root.bind("<Left>", lambda e: self.move("left"))
         self.root.bind("<Right>", lambda e: self.move("right"))
         self.root.bind("<Up>", lambda e: self.move("up"))
         self.root.bind("<Down>", lambda e: self.move("down"))
-        self.root.bind("r", lambda e: self.restart())
+
+    def draw_board(self):
+        self.canvas.delete("all")
+        self.score_label.config(text=f"Score: {self.board.score}")
+        for r in range(GRID_SIZE):
+            for c in range(GRID_SIZE):
+                x = c * (TILE_SIZE + PADDING) + PADDING
+                y = r * (TILE_SIZE + PADDING) + PADDING
+                value = self.board.grid[r][c]
+                color = COLORS.get(value, "#3c3a32")
+                text_color = "#f9f6f2" if value >= 8 else "#776e65"
+                self.canvas.create_rectangle(x, y, x + TILE_SIZE, y + TILE_SIZE, fill=color, outline="")
+                if value != 0:
+                    self.canvas.create_text(
+                        x + TILE_SIZE // 2, y + TILE_SIZE // 2,
+                        text=str(value), font=("Helvetica", 36, "bold"), fill=text_color
+                    )
 
     def move(self, direction):
-        moves = {
-            "left": self.board.move_left,
-            "right": self.board.move_right,
-            "up": self.board.move_up,
-            "down": self.board.move_down,
-        }
-
-        moved = moves[direction]()
-        if moved:
+        moves = {"left": self.board.move_left, "right": self.board.move_right,
+                 "up": self.board.move_up, "down": self.board.move_down}
+        if moves[direction]():
             self.board.spawn_tile()
             self.draw_board()
-
             if self.board.has_won():
-                messagebox.showinfo("You Win!", f"You reached 2048! Score: {self.board.score}")
+                messagebox.showinfo("You Win!", f"Score: {self.board.score}")
             elif not self.board.has_moves():
-                messagebox.showinfo("Game Over", f"No moves left. Score: {self.board.score}")
+                messagebox.showinfo("Game Over", f"Score: {self.board.score}")
 
     def restart(self):
         self.board.reset()
         self.draw_board()
+
+    def go_back(self):
+        if self.back_callback:
+            self.back_callback()
 
 
 def compress_row(row):
@@ -222,9 +206,3 @@ def can_merge(grid):
             if r + 1 < len(grid) and val == grid[r + 1][c]:
                 return True
     return False
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    game = Game2048(root)
-    root.mainloop()

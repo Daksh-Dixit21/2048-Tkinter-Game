@@ -1,17 +1,31 @@
-# 2048 Game
+# Python Game Hub
 
-A fully functional 2048 puzzle game built with Python tkinter. Slide tiles, merge matching numbers, and reach 2048!
+A collection of 5 classic games built with Python tkinter. No external dependencies required.
 
-## How to Play
+## Games Included
+
+| Game | Controls | Description |
+|------|----------|-------------|
+| **2048** | Arrow keys | Slide tiles, merge numbers, reach 2048 |
+| **Snake** | Arrow keys / WASD | Eat food, grow longer, don't crash |
+| **Tic-Tac-Toe** | Mouse click | Play vs AI opponent |
+| **Pong** | Up/Down arrows | First to 5 wins against CPU |
+| **Breakout** | Left/Right arrows | Smash all bricks to win |
+
+## How to Run
 
 ```bash
-python game2048.py
+python main.py
 ```
 
-- **Arrow keys** to move tiles (Left, Right, Up, Down)
-- **R** to restart
-- Tiles with the same number merge when they collide
-- Goal: create a tile with the value **2048**
+## Project Structure
+
+- `main.py` - Game hub with menu and game launcher
+- `game2048.py` - 2048 sliding tile puzzle
+- `snake.py` - Classic snake game
+- `tictactoe.py` - Tic-tac-toe with AI
+- `pong.py` - Single player pong
+- `breakout.py` - Brick breaker game
 
 <!-- AUTODOCS:OVERVIEW:START -->
 **Primary language:** Python
