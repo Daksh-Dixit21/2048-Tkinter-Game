@@ -28,10 +28,46 @@ python main.py
 - `breakout.py` - Brick breaker game
 
 <!-- AUTODOCS:OVERVIEW:START -->
+**Primary language:** Python
+
+**Total files:** 3
 <!-- AUTODOCS:OVERVIEW:END -->
 
 <!-- AUTODOCS:API:START -->
+_No API routes detected._
 <!-- AUTODOCS:API:END -->
 
 <!-- AUTODOCS:ARCHITECTURE:START -->
+```mermaid
+graph TD
+__init__ --> spawn_tile
+__init__ --> spawn_tile
+move_left --> compress
+move_left --> merge
+move_left --> compress
+move_right --> compress
+move_right --> merge
+move_right --> compress
+move_up --> compress
+move_up --> merge
+move_up --> compress
+move_down --> compress
+move_down --> merge
+move_down --> compress
+reset --> spawn_tile
+reset --> spawn_tile
+__init__ --> draw_board
+__init__ --> bind_keys
+bind_keys --> move
+bind_keys --> move
+bind_keys --> move
+bind_keys --> move
+bind_keys --> restart
+move --> spawn_tile
+move --> draw_board
+move --> has_won
+move --> has_moves
+restart --> reset
+restart --> draw_board
+```
 <!-- AUTODOCS:ARCHITECTURE:END -->
